@@ -135,7 +135,9 @@ async function fetchLesson(words){
                             .join(', ');
   const prompt =
 `Con estas 10 palabras: ${listado}. Devuelve SOLO JSON:
-1. "vocabulario": 10 objetos {sv, es, ej_sv, ej_es}. ej_es termina con emoji.
+1. "vocabulario": 10 objetos {sv, es, ej_sv, ej_es}.
+   - ej_es = FRASE EN ESPAÑOL **de al menos 4 palabras** que incluya la palabra en contexto y **TERMINE con un emoji** (😀, 🐶, etc.).
+   - ej_sv = la MISMA frase traducida al sueco (misma longitud aproximada), sin omitir la palabra.
 2. "ejercicios": 10 objetos {es, sv}. Historia coherente; 2 negativas y 2 preguntas; cada es termina con emoji.
 3. "repaso": 20 objetos {es, sv}. 10 nuevas + 10 de ${extra}.`;
   const obj = safeJSON(await openAI(prompt));
