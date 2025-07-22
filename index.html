@@ -65,173 +65,82 @@
 <button id="finish-btn">Dar por terminada lección</button>
 
 <script>
-/* ---------- CONFIG ---------- */
-const DICT_KEY = 'curso_sueco_diccionario';
-const ENDPOINT = '/.netlify/functions/openai';
+const DICT_KEY='curso_sueco_diccionario';
+const ENDPOINT='/.netlify/functions/openai';
+const statusEl=document.getElementById('status');
+const vocabEl=document.getElementById('vocab-list');
+const exEl=document.getElementById('exercise-list');
+const repEl=document.getElementById('review-list');
+const finishBtn=document.getElementById('finish-btn');
+const chatBox=document.getElementById('chat-box');
+const chatInp=document.getElementById('chat-input');
+const chatBtn=document.getElementById('chat-send');
+let dictionary=JSON.parse(localStorage.getItem(DICT_KEY)||'[]');
+let currentLesson=null;
+const setStatus=t=>statusEl.textContent=t;
+function safeJSON(t){try{return JSON.parse(t);}catch{const m=t.match(/\{[\s\S]*\}/);if(m)try{return JSON.parse(m[0]);}catch{}return null;}}
+async function openAI(prompt){const r=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});if(!r.ok)throw new Error(r.status+' '+r.statusText);const {content}=await r.json();return content.trim();}
+const clear=()=>{vocabEl.innerHTML='';exEl.innerHTML='';repEl.innerHTML='';};
 
-/* ---------- DOM ---------- */
-const statusEl = document.getElementById('status');
-const vocabEl  = document.getElementById('vocab-list');
-const exEl     = document.getElementById('exercise-list');
-const repEl    = document.getElementById('review-list');
-const finishBtn= document.getElementById('finish-btn');
-/* Chat */
-const chatBox  = document.getElementById('chat-box');
-const chatInp  = document.getElementById('chat-input');
-const chatBtn  = document.getElementById('chat-send');
-
-/* ---------- STATE ---------- */
-let dictionary = JSON.parse(localStorage.getItem(DICT_KEY)||'[]'); // [{sv,es}]
-let currentLesson = null;
-
-/* ---------- UTIL ---------- */
-const setStatus = t => statusEl.textContent = t;
-function safeJSON(txt){
-  try{return JSON.parse(txt);}
-  catch{const m=txt.match(/\{[\s\S]*\}/);if(m)try{return JSON.parse(m[0]);}catch{}return null;}
-}
-async function openAI(prompt){
-  const r = await fetch(ENDPOINT,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({prompt})
-  });
-  if(!r.ok) throw new Error(r.status+' '+r.statusText);
-  const {content}=await r.json();
-  return content.trim();
-}
-const clear = () => {vocabEl.innerHTML='';exEl.innerHTML='';repEl.innerHTML='';};
-
-/* ---------- 1. NUEVAS PALABRAS ---------- */
+/* ---- 1. NUEVAS PALABRAS ---- */
 async function fetchNewWords(){
   setStatus('🔎 Obteniendo palabras…');
-  const banned = dictionary.map(w=>w.sv).join(', ');
-  const now    = new Date().toISOString();        // fuerza aleatoriedad
-  const basePrompt =
-    `FECHA:${now}. Genera SOLO JSON válido: {"vocabulario":[{sv, es}×10]}. `+
-    `Elige 10 PALABRAS DE SUECO DIFERENTES cada vez. `+
-    `No repitas ninguna de estas ya vistas: ${banned}. `+
-    `Incluye exactamente 6 sust/adj y 4 verb/conector.`;
-  for(let intento=0; intento<2; intento++){
-    const obj = safeJSON(await openAI(basePrompt));
+  const banned=dictionary.map(w=>w.sv).join(', ');
+  const now=new Date().toISOString();
+  const prompt=`FECHA:${now}. Devuelve SOLO JSON válido {"vocabulario":[{sv,es}×10]}. `+
+    `Deben ser 10 PALABRAS NUEVAS (no incluyas: ${banned || 'ninguna'}). `+
+    `Usa 6 sust/adj y 4 verb/conector.`;
+  for(let i=0;i<2;i++){
+    const obj=safeJSON(await openAI(prompt));
     if(obj?.vocabulario?.length===10){
-      const words = obj.vocabulario
-                       .map(o=>({sv:o.sv?.trim(), es:o.es?.trim()}))
-                       .filter(w=>w.sv && w.es && !dictionary.some(d=>d.sv===w.sv));
+      const words=obj.vocabulario.map(o=>({sv:o.sv?.trim(),es:o.es?.trim()})).filter(w=>w.sv&&w.es&&!dictionary.some(d=>d.sv===w.sv));
       if(words.length===10) return words;
     }
   }
   throw new Error('No se obtuvieron 10 palabras nuevas');
 }
 
-/* ---------- 2. LECCIÓN COMPLETA ---------- */
+/* ---- 2. LECCIÓN ---- */
 async function fetchLesson(words){
   setStatus('🛠️ Generando ejercicios…');
-  const listado = words.map(w=>`${w.sv}:${w.es}`).join(', ');
-  const extra   = dictionary.filter(d=>!words.some(w=>w.sv===d.sv))
-                            .sort(() => 0.5 - Math.random())
-                            .slice(0,10)
-                            .map(d=>`${d.sv}:${d.es}`)
-                            .join(', ');
-  const prompt =
-`Con estas 10 palabras: ${listado}. Devuelve SOLO JSON:
-1. "vocabulario": 10 objetos {sv, es, ej_sv, ej_es}.
-   - ej_es = FRASE EN ESPAÑOL **de al menos 4 palabras** que incluya la palabra en contexto y **TERMINE con un emoji** (😀, 🐶, etc.).
-   - ej_sv = la MISMA frase traducida al sueco (misma longitud aproximada), sin omitir la palabra.
-2. "ejercicios": 10 objetos {es, sv}. Historia coherente; 2 negativas y 2 preguntas; cada es termina con emoji.
-3. "repaso": 20 objetos {es, sv}. 10 nuevas + 10 de ${extra}.`;
-  const obj = safeJSON(await openAI(prompt));
+  const listado=words.map(w=>`${w.sv}:${w.es}`).join(', ');
+  const extra=dictionary.filter(d=>!words.some(w=>w.sv===d.sv)).sort(()=>0.5-Math.random()).slice(0,10).map(d=>`${d.sv}:${d.es}`).join(', ');
+  const prompt=`Con estas palabras: ${listado}. Devuelve SOLO JSON:
+1. "vocabulario": 10 objs {sv, es, ej_sv, ej_es}.
+   • ej_es: FRASE en español (≥4 palabras) con la palabra, TERMINA con emoji.
+   • ej_sv: MISMA frase traducida al sueco.
+2. "ejercicios": 10 objs {es, sv}. Historia; 2 negativas; 2 preguntas; cada es termina con emoji.
+3. "repaso": 20 objs {es, sv}. 10 nuevas + 10 de ${extra}.`;
+  const obj=safeJSON(await openAI(prompt));
   if(!obj) throw new Error('JSON lección inválido');
-  ['vocabulario','ejercicios','repaso'].forEach(k=>{
-    if(obj[k] && !Array.isArray(obj[k])) obj[k] = Object.values(obj[k]);
-  });
+  ['vocabulario','ejercicios','repaso'].forEach(k=>{if(obj[k]&&!Array.isArray(obj[k]))obj[k]=Object.values(obj[k]);});
   return obj;
 }
 
-/* ---------- 3. RENDER ---------- */
-function renderBasic(words){
-  vocabEl.innerHTML='';
-  words.forEach(w=>{
-    vocabEl.insertAdjacentHTML('beforeend',`<div class='item'><strong>${w.es}</strong> - ${w.sv}</div>`);
-  });
-}
+/* ---- 3. RENDER ---- */
 function renderLesson(les){
   clear();
   les.vocabulario.forEach(w=>{
-    if(!(w.sv&&w.es)) return;
+    if(!(w.sv&&w.es&&w.ej_es&&w.ej_sv))return;
     vocabEl.insertAdjacentHTML('beforeend',
       `<div class='item'><strong>${w.es}</strong> - ${w.sv}<br>`+
-      `<span class='example'>${w.ej_es}<br><strong>${w.ej_sv}</strong></span></div>`
-    );
+      `<span class='example'>${w.ej_es}<br><strong>${w.ej_sv}</strong></span></div>`);
   });
-  les.ejercicios.forEach((f,i)=>{
-    if(!(f.es&&f.sv)) return;
-    exEl.insertAdjacentHTML('beforeend',
-      `<div class='item'>${i+1}. ${f.es} <button class='show'>Solución</button> <span class='hidden'>${f.sv}</span></div>`
-    );
-  });
-  les.repaso.forEach(p=>{
-    if(!(p.es&&p.sv)) return;
-    repEl.insertAdjacentHTML('beforeend',
-      `<div class='item'>${p.es} <button class='show'>Solución</button> <span class='hidden'>${p.sv}</span></div>`
-    );
-  });
-  currentLesson = les;
+  les.ejercicios.forEach((f,i)=>{if(!(f.es&&f.sv))return;exEl.insertAdjacentHTML('beforeend',`<div class='item'>${i+1}. ${f.es} <button class='show'>Solución</button> <span class='hidden'>${f.sv}</span></div>`);});
+  les.repaso.forEach(p=>{if(!(p.es&&p.sv))return;repEl.insertAdjacentHTML('beforeend',`<div class='item'>${p.es} <button class='show'>Solución</button> <span class='hidden'>${p.sv}</span></div>`);});
+  currentLesson=les;
 }
 
-/* ---------- 4. EVENTOS ---------- */
-document.addEventListener('click',e=>{
-  if(e.target.classList.contains('show')){
-    e.target.nextElementSibling.classList.toggle('hidden');
-  }
-});
+document.addEventListener('click',e=>{if(e.target.classList.contains('show'))e.target.nextElementSibling.classList.toggle('hidden');});
 
-async function generate(){
-  try{
-    clear();
-    const words = await fetchNewWords();
-    renderBasic(words);
-    const lesson = await fetchLesson(words);
-    renderLesson(lesson);
-    setStatus('✅ Lección lista');
-  }catch(e){
-    console.error(e);
-    setStatus('⚠️ '+e.message);
-  }
-}
+async function generate(){try{const words=await fetchNewWords();const les=await fetchLesson(words);renderLesson(les);setStatus('✅ Lección lista');}catch(e){console.error(e);setStatus('⚠️ '+e.message);}}
+finishBtn.onclick=()=>{if(!currentLesson)return;currentLesson.vocabulario.forEach(w=>{if(!dictionary.some(d=>d.sv===w.sv))dictionary.push({sv:w.sv,es:w.es});});localStorage.setItem(DICT_KEY,JSON.stringify(dictionary));generate();};
+window.addEventListener('load',()=>{if(!navigator.onLine)return setStatus('⚠️ Sin conexión');generate();});
 
-finishBtn.onclick = ()=>{
-  if(!currentLesson) return;
-  currentLesson.vocabulario.forEach(w=>{
-    if(!dictionary.some(d=>d.sv===w.sv)) dictionary.push({sv:w.sv, es:w.es});
-  });
-  localStorage.setItem(DICT_KEY, JSON.stringify(dictionary));
-  generate();
-};
-
-window.addEventListener('load',()=>{
-  if(!navigator.onLine) return setStatus('⚠️ Sin conexión');
-  generate();
-});
-
-/* ---------- 5. CHAT ---------- */
+/* ---- 4. CHAT ---- */
 chatBtn.addEventListener('click',sendChat);
-chatInp.addEventListener('keypress',e=>{ if(e.key==='Enter') sendChat(); });
-
-async function sendChat(){
-  const q = chatInp.value.trim();
-  if(!q) return;
-  chatInp.value='';
-  chatBox.innerHTML += `<div><strong>Tú:</strong> ${q}</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
-  try{
-    const a = await openAI(`Actúa como un profesor de sueco para niños españoles de 10‑11 años. Responde brevemente a esta duda: ${q}`);
-    chatBox.innerHTML += `<div><strong>ChatGPT:</strong> ${a}</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }catch(e){
-    chatBox.innerHTML += `<div style='color:#ff6b6b;'>Error: ${e.message}</div>`;
-  }
-}
+chatInp.addEventListener('keypress',e=>{if(e.key==='Enter')sendChat();});
+async function sendChat(){const q=chatInp.value.trim();if(!q)return;chatInp.value='';chatBox.innerHTML+=`<div><strong>Tú:</strong> ${q}</div>`;chatBox.scrollTop=chatBox.scrollHeight;try{const a=await openAI(`Actúa como un profesor de sueco para niños españoles de 10‑11 años. Responde brevemente a esta duda: ${q}`);chatBox.innerHTML+=`<div><strong>ChatGPT:</strong> ${a}</div>`;chatBox.scrollTop=chatBox.scrollHeight;}catch(e){chatBox.innerHTML+=`<div style='color:#ff6b6b;'>Error: ${e.message}</div>`;}}
 </script>
 </body>
 </html>
