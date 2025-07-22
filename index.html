@@ -20,6 +20,9 @@
     #finish-btn{display:block;margin:2rem auto}
     #status{color:var(--accent);margin-bottom:1rem;min-height:1.4em}
     #review-list{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    /* --- estilos del chat --- */
+    #chat-box{max-height:220px;overflow-y:auto;padding:1rem;border:1px solid #555;border-radius:var(--rad);background:var(--surface);font-size:.95rem;margin-bottom:1rem}
+    #chat-box div{margin-bottom:.5rem}
     @media (max-width:600px){
       body{padding:.5rem}
       section{padding:.75rem 1rem;margin-bottom:1.2rem}
@@ -52,34 +55,42 @@
   <div id="review-list"></div>
 </section>
 
+<!-- CHAT -->
+<section>
+  <h2>Pregúntame si tienes dudas</h2>
+  <div id="chat-box"></div>
+  <input id="chat-input" placeholder="Escribe tu pregunta…" style="width:100%;padding:.5rem;border-radius:var(--rad);border:none">
+  <button id="chat-send">Enviar</button>
+</section>
+
 <button id="finish-btn">Dar por terminada lección</button>
 
 <script>
-const MODEL    = 'gpt-4o-mini';
+/* ---------- CONFIG ---------- */
 const DICT_KEY = 'curso_sueco_diccionario';
 const ENDPOINT = '/.netlify/functions/openai';
 
+/* ---------- DOM ---------- */
 const statusEl = document.getElementById('status');
 const vocabEl  = document.getElementById('vocab-list');
 const exEl     = document.getElementById('exercise-list');
 const repEl    = document.getElementById('review-list');
 const finishBtn= document.getElementById('finish-btn');
+/* Chat */
+const chatBox  = document.getElementById('chat-box');
+const chatInp  = document.getElementById('chat-input');
+const chatBtn  = document.getElementById('chat-send');
 
-let dictionary    = JSON.parse(localStorage.getItem(DICT_KEY)||'[]'); // {sv,es}
+/* ---------- STATE ---------- */
+let dictionary = JSON.parse(localStorage.getItem(DICT_KEY)||'[]'); // {sv,es}
 let currentLesson = null;
 
+/* ---------- UTIL ---------- */
 const setStatus = t => statusEl.textContent = t;
-const clear = ()=>{ vocabEl.innerHTML=''; exEl.innerHTML=''; repEl.innerHTML=''; };
-
 function safeJSON(txt){
-  try{ return JSON.parse(txt);}
-  catch{
-    const m=txt.match(/\{[\s\S]*\}/);
-    if(m) try{ return JSON.parse(m[0]); }catch{}
-    return null;
-  }
+  try{return JSON.parse(txt);}
+  catch{const m=txt.match(/\{[\s\S]*\}/);if(m)try{return JSON.parse(m[0]);}catch{}return null;}
 }
-
 async function openAI(prompt){
   const r = await fetch(ENDPOINT,{
     method:'POST',
@@ -90,8 +101,9 @@ async function openAI(prompt){
   const {content}=await r.json();
   return content.trim();
 }
+const clear = () => {vocabEl.innerHTML='';exEl.innerHTML='';repEl.innerHTML='';};
 
-// ---------- 1. nuevas palabras ----------
+/* ---------- 1. NUEVAS PALABRAS ---------- */
 async function fetchNewWords(){
   setStatus('🔎 Obteniendo palabras…');
   const banned = dictionary.map(w=>w.sv).join(', ');
@@ -106,41 +118,30 @@ async function fetchNewWords(){
   throw new Error('No se obtuvieron 10 palabras válidas');
 }
 
-// ---------- 2. lección completa ----------
+/* ---------- 2. LECCIÓN COMPLETA ---------- */
 async function fetchLesson(words){
   setStatus('🛠️ Generando ejercicios…');
-  const listado = words.map(w=>`${w.sv}:${w.es}`).join(', ');
-  const extra   = dictionary.filter(d=>!words.some(w=>w.sv===d.sv))
-                            .sort(()=>0.5-Math.random())
-                            .slice(0,10)
-                            .map(d=>`${d.sv}:${d.es}`)
-                            .join(', ');
-
-  const prompt = `Con estas 10 palabras: ${listado}. Devuelve SOLO JSON con: 
-1. "vocabulario": 10 objetos {sv, es, ej_sv, ej_es}. 
-   - ej_es = frase EJEMPLO EN ESPAÑOL (mín. 4 palabras) y TERMINA con un emoji 😀.
-   - ej_sv = la MISMA frase traducida al sueco.
-2. "ejercicios": 10 objetos {es, sv}.  
-   - 10 frases españolas forman una pequeña historia; incluye al menos 2 negativas y 2 preguntas; tiempos variados; cada 'es' termina en emoji.
-3. "repaso": 20 objetos {es, sv}.  
-   - Primeros 10 son EXACTAMENTE las 10 palabras nuevas.  
-   - Los otros 10 al azar del diccionario restante: ${extra}.`;
-
+  const listado=words.map(w=>`${w.sv}:${w.es}`).join(', ');
+  const extra=dictionary.filter(d=>!words.some(w=>w.sv===d.sv))
+                        .sort(()=>0.5-Math.random())
+                        .slice(0,10)
+                        .map(d=>`${d.sv}:${d.es}`)
+                        .join(', ');
+  const prompt=`Con estas 10 palabras: ${listado}. Devuelve SOLO JSON con:
+1. "vocabulario": 10 objetos {sv, es, ej_sv, ej_es}. ej_es termina con emoji.
+2. "ejercicios": 10 objetos {es, sv}. Historia coherente; 2 negativas y 2 preguntas; cada es termina con emoji.
+3. "repaso": 20 objetos {es, sv}. 10 nuevas + 10 de ${extra}.`;
   const obj=safeJSON(await openAI(prompt));
   if(!obj) throw new Error('JSON lección inválido');
-  ['vocabulario','ejercicios','repaso'].forEach(k=>{
-    if(obj[k]&&!Array.isArray(obj[k])) obj[k]=Object.values(obj[k]);
-  });
+  ['vocabulario','ejercicios','repaso'].forEach(k=>{if(obj[k]&&!Array.isArray(obj[k]))obj[k]=Object.values(obj[k]);});
   return obj;
 }
 
-// ---------- 3. render ----------
+/* ---------- 3. RENDER ---------- */
 function renderBasic(words){
   vocabEl.innerHTML='';
   words.forEach(w=>{
-    vocabEl.insertAdjacentHTML('beforeend',
-      `<div class='item'><strong>${w.es}</strong> - ${w.sv}</div>`
-    );
+    vocabEl.insertAdjacentHTML('beforeend',`<div class='item'><strong>${w.es}</strong> - ${w.sv}</div>`);
   });
 }
 function renderLesson(les){
@@ -167,7 +168,7 @@ function renderLesson(les){
   currentLesson=les;
 }
 
-// ---------- 4. eventos ----------
+/* ---------- 4. EVENTOS ---------- */
 document.addEventListener('click',e=>{
   if(e.target.classList.contains('show')){
     e.target.nextElementSibling.classList.toggle('hidden');
@@ -201,6 +202,25 @@ window.addEventListener('load',()=>{
   if(!navigator.onLine) return setStatus('⚠️ Sin conexión');
   generate();
 });
+
+/* ---------- 5. CHAT ---------- */
+chatBtn.addEventListener('click',sendChat);
+chatInp.addEventListener('keypress',e=>{if(e.key==='Enter')sendChat();});
+
+async function sendChat(){
+  const q=chatInp.value.trim();
+  if(!q) return;
+  chatInp.value='';
+  chatBox.innerHTML+=`<div><strong>Tú:</strong> ${q}</div>`;
+  chatBox.scrollTop=chatBox.scrollHeight;
+  try{
+    const a=await openAI(`Actúa como un profesor de sueco para niños españoles de 10‑11 años. Responde brevemente a esta duda: ${q}`);
+    chatBox.innerHTML+=`<div><strong>ChatGPT:</strong> ${a}</div>`;
+    chatBox.scrollTop=chatBox.scrollHeight;
+  }catch(e){
+    chatBox.innerHTML+=`<div style='color:#ff6b6b;'>Error: ${e.message}</div>`;
+  }
+}
 </script>
 </body>
 </html>
