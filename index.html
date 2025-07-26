@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Curso de Sueco</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{--bg:#121212;--surface:#1e1e1e;--text:#e0e0e0;--primary:#bb86fc;--accent:#03dac6;--rad:12px}
     *{box-sizing:border-box}
@@ -12,8 +12,10 @@
     section{background:var(--surface);border-radius:var(--rad);padding:1rem 1.5rem;margin-bottom:2rem;box-shadow:0 4px 12px rgba(0,0,0,.5)}
     button{background:var(--primary);color:var(--text);border:none;padding:.5rem 1rem;border-radius:var(--rad);cursor:pointer;font-size:1rem;margin-top:.5rem}
     button:hover{background:var(--accent)}
-    .hidden{display:none}.item{margin-bottom:.9rem}
-    .example{font-style:italic;font-size:.95rem}.example strong{color:var(--accent)}
+    .hidden{display:none}
+    .item{margin-bottom:.9rem}
+    .example{font-style:italic;font-size:.95rem}
+    .example strong{color:var(--accent)}
     .note{margin:0 0 .5rem;color:var(--accent);font-size:.9rem}
     #finish-btn{display:block;margin:2rem auto}
     #status{color:var(--accent);margin-bottom:1rem;min-height:1.4em}
@@ -23,42 +25,47 @@
     .speak{cursor:pointer;margin-left:.4rem}
     #dict-box{column-count:4;column-gap:1rem}
     #clear-dict{background:#e35353}
-    @media(max-width:600px){
-      body{padding:.5rem}
-      section{padding:.75rem 1rem;margin-bottom:1.2rem}
-      h1{font-size:1.4rem;text-align:center}h2{font-size:1.1rem}
-      #review-list{grid-template-columns:1fr}button{width:100%}
-    }
+    /* Ayuda flotante */
+    #help-btn{position:fixed;top:18px;right:18px;z-index:2000;background:var(--surface);color:var(--primary);border:none;border-radius:50%;width:38px;height:38px;font-size:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;pointer-events:auto}
+    #help-btn:hover{background:var(--primary);color:var(--surface)}
+    #help-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:var(--surface);color:var(--text);border-radius:var(--rad);box-shadow:0 8px 32px rgba(0,0,0,.45);padding:2.5rem 1.5rem 1.5rem 1.5rem;max-width:95vw;width:370px;font-size:1.05rem;display:none}
+    #help-modal.visible{display:block}
+    #help-modal h3{margin-top:0;color:var(--primary);font-size:1.2rem}
+    #help-modal ul{margin:0 0 .5em 1.2em;padding:0}
+    #help-modal button.close-help{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--accent);font-size:1.7rem;cursor:pointer;line-height:1;width:2.2em;height:2.2em;display:flex;align-items:center;justify-content:center}
+    @media(max-width:600px){body{padding:.5rem}section{padding:.75rem 1rem;margin-bottom:1.2rem}h1{font-size:1.4rem;text-align:center}h2{font-size:1.1rem}#review-list{grid-template-columns:1fr}button{width:100%}#help-modal{width:98vw;max-width:98vw;padding:3.2rem .5rem 1rem .5rem;font-size:1rem}#help-btn{top:10px;right:10px;width:44px;height:44px;font-size:1.7rem}#help-modal button.close-help{top:10px;right:10px;font-size:2rem;width:2.2em;height:2.2em}}
   </style>
 </head>
-
 <body>
 <h1>Curso de Sueco</h1>
 <p id="status"></p>
 
-<section><h2>Vocabulario</h2>
-  <p class="note">Copia 10&nbsp;veces cada palabra en tu cuaderno para aprenderlas.</p>
-  <div id="vocab-list"></div>
-</section>
-
-<section><h2>Ejercicios</h2>
-  <p class="note">Traduce al sueco en tu cuaderno y, si encuentras palabras que no conoces, cópialas diez veces para aprenderlas.</p>
-  <div id="exercise-list"></div>
-</section>
-
-<section><h2>Repaso</h2>
-  <p class="note">Traduce estas palabras al sueco en tu cuaderno y, si alguna no te la sabes, cópiala diez veces para aprenderla.</p>
-  <div id="review-list"></div>
-</section>
+<section><h2>Vocabulario</h2><p class="note">Copia 10&nbsp;veces cada palabra en tu cuaderno para aprenderlas.</p><div id="vocab-list"></div></section>
+<section><h2>Ejercicios</h2><p class="note">Traduce al sueco en tu cuaderno y, si encuentras palabras que no conoces, cópialas diez veces para aprenderlas.</p><div id="exercise-list"></div></section>
+<section><h2>Repaso</h2><p class="note">Traduce estas palabras al sueco en tu cuaderno y, si alguna no te la sabes, cópiala diez veces para aprenderla.</p><div id="review-list"></div></section>
 
 <section>
-  <h2>Pregúntame si tienes dudas</h2>
+  <h2>Chat con tu profesor virtual</h2>
   <div id="chat-box"></div>
   <input id="chat-input" placeholder="Escribe tu pregunta…" style="width:100%;padding:.5rem;border-radius:var(--rad);border:none">
   <button id="chat-send">Enviar</button>
 </section>
 
 <button id="finish-btn">Dar por terminada la lección</button>
+
+<!-- ---------- Sección de nivel ---------- -->
+<section id="level-section" style="background:var(--surface);border-radius:var(--rad);padding:1rem 1.5rem;margin-bottom:2rem;box-shadow:0 4px 12px rgba(0,0,0,.5)">
+  <div style="margin-bottom:.7rem">
+    <button id="level-current-btn" style="all:unset;cursor:pointer;color:var(--primary);font-weight:bold;font-size:1.1em;">Nivel actual: <span id="level-current"></span></button>
+    <button id="level-next-btn" style="margin-left:1em;">Avanzar nivel</button>
+    <button id="level-toggle-select" style="margin-left:1em;">Selecciona nivel</button>
+  </div>
+  <div id="level-select-wrap" class="hidden" style="margin-top:.7rem">
+    <div class="note">Pulsa en Guardar y terminar lección para guardar tu elección</div>
+    <div id="level-radio-list" style="margin-bottom:.7rem"></div>
+    <button id="level-save-btn">Guardar y terminar lección</button>
+  </div>
+</section>
 
 <!-- ---------- Diccionario completo ---------- -->
 <section id="dict-section">
@@ -74,62 +81,112 @@
   <h2 style="margin-bottom:0">
     <button id="toggle-about" style="all:unset;cursor:pointer;color:var(--primary)">▸ Sobre la aplicación</button>
   </h2>
-  <div id="about-text" class="hidden" style="margin-top:.5rem">
-    <p>
-      <em>Curso de Sueco</em> es un pequeño experimento con IA, creado por <strong>Emilio Rodríguez</strong>.<br>
-      Propone vocabulario y ejercicios básicos de sueco. Puedes preguntar gramática en el chat.<br>
-      Al pulsar «Dar por terminada la lección» las palabras se guardan como aprendidas.<br>
-      Pulsa el altavoz para escuchar la pronunciación en sueco.
-    </p>
-    <div style="margin-top:20px">
-      <label for="sugerencia">¿Tienes alguna duda, sugerencia o comentario?</label><br>
-      <textarea id="sugerencia" rows="1" style="width:100%"></textarea><br>
-      <button onclick="enviarSugerencia()">Enviar sugerencia</button>
-      <p id="mensaje-enviado" style="color:green;display:none">✅ ¡Gracias por tu sugerencia!</p>
-    </div>
+ <div id="about-text" class="hidden" style="margin-top:.5rem">
+  <p>
+    <strong>Curso de Sueco</strong> es una aplicación educativa creada por <strong>Emilio Rodríguez</strong>.<br>
+    Utiliza Inteligencia Artificial para sugerir vocabulario y ejercicios de sueco de manera personalizada.<br>
+    El objetivo es que puedas aprender y practicar sueco de forma sencilla, práctica y a tu ritmo.<br>
+    <br>
+    Si tienes cualquier duda, sugerencia o comentario, puedes enviarlo a continuación. ¡Tu opinión es muy valiosa para seguir mejorando la aplicación!
+  </p>
+  <div style="margin-top: 20px;">
+    <label for="sugerencia">¿Tienes alguna sugerencia o comentario?</label><br>
+    <textarea id="sugerencia" rows="1" style="width: 100%;"></textarea><br>
+    <button onclick="enviarSugerencia()">Enviar sugerencia</button>
+    <p id="mensaje-enviado" style="color: green; display: none;">✅ ¡Gracias por tu sugerencia!</p>
   </div>
+</div>
 </section>
+
+<!-- Botón de ayuda flotante -->
+<button id="help-btn" title="¿Cómo funciona?" onclick="openHelpModal(event)" ontouchend="openHelpModal(event)">?</button>
+<!-- Modal de ayuda -->
+<div id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+  <button class="close-help" title="Cerrar ayuda">&times;</button>
+  <h3 id="help-title">¿Cómo usar la aplicación?</h3>
+  <ul>
+    <li>En tu <strong>cuaderno</strong>, aprende el vocabulario, haz los ejercicios y el repaso que aparece en cada lección.</li>
+    <li>Usa el <strong>chat</strong> para preguntar dudas a tu profesor virtual sobre gramática, vocabulario y cualquier cosa que necesites.</li>
+    <li>Pulsa el icono <span style="color:var(--accent)">🔊</span> para escuchar la pronunciación en sueco.</li>
+    <li>Pulsa <strong>"Dar por terminada la lección"</strong> para guardar tu progreso y vocabulario.</li>
+    <li><strong>Selecciona tu nivel</strong> con el botón "Selecciona nivel" o avanza con "Avanzar nivel".</li>
+  </ul>
+  <div style="margin-top:1em;font-size:.97em;color:var(--accent)">¡Explora, repite y aprende a tu ritmo!</div>
+</div>
 
 <script>
 /* ---------- función de log ---------- */
-function logEvent(action,details=''){
-  fetch('/.netlify/functions/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,details})})
-  .catch(console.error);
+function logEvent(action, details='') {
+  fetch('/.netlify/functions/log', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, details })
+  }).catch(console.error);
 }
 
 /* ---------- configuración ---------- */
 const DICT_KEY='curso_sueco_diccionario';
 const ENDPOINT='/.netlify/functions/openai';
 const TTS_ENDPOINT='/.netlify/functions/tts';
+const LEVEL_KEY = 'curso_sueco_nivel';
+let nivel = Number(localStorage.getItem(LEVEL_KEY) || 1);
+const levels = [
+  {id:1,  nombre:'Nivel 1',  descripcion:'Presente afirmativo (presens)'},
+  {id:2,  nombre:'Nivel 2',  descripcion:'Negaciones en presente y presente progresivo'},
+  {id:3,  nombre:'Nivel 3',  descripcion:'Pasado simple afirm./neg. (preteritum)'},
+  {id:4,  nombre:'Nivel 4',  descripcion:'Futuro (ska / kommer att)'},
+  {id:5,  nombre:'Nivel 5',  descripcion:'Preguntas en todos los tiempos previos'},
+  {id:6,  nombre:'Nivel 6',  descripcion:'Modales básicos (kan, måste, ska, borde)'},
+  {id:7,  nombre:'Nivel 7',  descripcion:'Oraciones con "det finns", algo/nada, contables'},
+  {id:8,  nombre:'Nivel 8',  descripcion:'Comparativos y superlativos'},
+  {id:9,  nombre:'Nivel 9',  descripcion:'Conectores simples (och, men, för, så)'},
+  {id:10, nombre:'Nivel 10', descripcion:'Perfecto (har + supinum)'},
+  {id:11, nombre:'Nivel 11', descripcion:'Condicionales 0 y 1 (om + presens/futurum)'},
+  {id:12, nombre:'Nivel 12', descripcion:'Voz pasiva (-s o bli + participio)'},
+  {id:13, nombre:'Nivel 13', descripcion:'Condicionales 2 y 3 (skulle + infinitiv)'},
+  {id:14, nombre:'Nivel 14', descripcion:'Discurso indirecto y adverbios oracionales'},
+  {id:15, nombre:'Nivel 15', descripcion:'Inversión avanzada, idioms y partikelverb'}
+];
 
 /* ---------- referencias DOM ---------- */
-const vocabEl=document.getElementById('vocab-list'),
-      exEl   =document.getElementById('exercise-list'),
-      repEl  =document.getElementById('review-list');
-const statusEl=document.getElementById('status'),
-      chatBox=document.getElementById('chat-box'),
-      chatInp=document.getElementById('chat-input');
-const dictBox=document.getElementById('dict-box'),
-      btnShow=document.getElementById('show-dict'),
-      btnClear=document.getElementById('clear-dict');
-const aboutText=document.getElementById('about-text'),
-      toggleAbout=document.getElementById('toggle-about');
+const vocabEl=document.getElementById('vocab-list');
+const exEl=document.getElementById('exercise-list');
+const repEl=document.getElementById('review-list');
+const statusEl=document.getElementById('status');
+const chatBox=document.getElementById('chat-box');
+const chatInp=document.getElementById('chat-input');
+const dictBox=document.getElementById('dict-box');
+const btnShow=document.getElementById('show-dict');
+const btnClear=document.getElementById('clear-dict');
+const aboutText=document.getElementById('about-text');
+const toggleAbout=document.getElementById('toggle-about');
+// Elements de nivel
+const levelCurrent=document.getElementById('level-current');
+const levelCurrentBtn=document.getElementById('level-current-btn');
+const levelNextBtn=document.getElementById('level-next-btn');
+const levelToggleSelect=document.getElementById('level-toggle-select');
+const levelSelectWrap=document.getElementById('level-select-wrap');
+const levelRadioList=document.getElementById('level-radio-list');
+const levelSaveBtn=document.getElementById('level-save-btn');
 
 /* ---------- estado ---------- */
-let dictionary=JSON.parse(localStorage.getItem(DICT_KEY)||'[]'),
-    currentLesson=null;
-const setStatus=t=>statusEl.textContent=t;
+let dictionary=JSON.parse(localStorage.getItem(DICT_KEY)||'[]');
+let currentLesson=null;
+function setStatus(msg){statusEl.textContent=msg;}
+
+/* ---------- controlar restauración de scroll ---------- */
 if('scrollRestoration'in history)history.scrollRestoration='manual';
 
 /* ---------- utilidades ---------- */
-const decodeEmojis=s=>String(s).replace(/\\u([\da-fA-F]{4})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));
-const stripEmojis =s=>decodeEmojis(s).replace(/\p{Extended_Pictographic}/gu,'').trim();
-const safeJSON    =t=>{try{return JSON.parse(t.replace(/```json|```/gi,'').trim())}catch{const m=t.match(/\{[\s\S]*\}/);if(m)try{return JSON.parse(m[0])}catch{};return null}};
-async function askOpenAI(prompt){
-  const r=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
-  if(!r.ok)throw new Error(r.statusText);
-  return (await r.json()).content.trim();
+function decodeEmojis(s=''){return String(s).replace(/\\u([\\da-fA-F]{4})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));}
+function stripEmojis(s){return decodeEmojis(s).replace(/\p{Extended_Pictographic}/gu,'').trim();}
+function safeJSON(t){try{return JSON.parse(t.replace(/```json|```/gi,'').trim());}catch{const m=t.match(/\{[\s\S]*\}/);if(m)try{return JSON.parse(m[0]);}catch{};return null;}}
+function getGrammarInstructions(nivel){
+  let out='– Frases simples.';
+  for(let i=0;i<nivel;++i){out+=`\n  – ${levels[i].descripcion}`;}
+  return out;
 }
+async function askOpenAI(prompt){const r=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});if(!r.ok)throw new Error(r.statusText);return (await r.json()).content.trim();}
 
 /* ---------- TTS ---------- */
 const audioCache=new Map();
@@ -139,23 +196,19 @@ async function speak(el,txt){
   try{
     const r=await fetch(TTS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt})});
     if(!r.ok)throw new Error('TTS error');
-    const b64=(await r.json()).audio,
-          blob=await fetch(`data:audio/mp3;base64,${b64}`).then(r=>r.blob()),
-          url =URL.createObjectURL(blob);
+    const b64=(await r.json()).audio;
+    const blob=await fetch(`data:audio/mp3;base64,${b64}`).then(r=>r.blob());
+    const url=URL.createObjectURL(blob);
     audioCache.set(txt,url);el.textContent='🔊';new Audio(url).play();
     logEvent('tts',txt);
-  }catch(e){el.textContent='❌';console.error(e);}
-}
-const speakIcon =t=>` <span class="speak" data-text="${t}">🔊</span>`;
+  }catch(e){el.textContent='❌';console.error(e);} }
+const speakIcon=t=>` <span class="speak" data-text="${t}">🔊</span>`;
 
 /* ---------- generación de datos ---------- */
 async function fetchNewWords(){
   setStatus('🔎 Obteniendo palabras…');
   const banned=dictionary.map(w=>w.sv).join(', ');
-  const prompt=`Devuélveme SOLO JSON {"vocabulario":[{sv,es}]×10}.  
-• <sv> palabra en SUECO • <es> traducción española.  
-• Incluye verbos y sustantivos comunes.  
-• No repitas ninguna de estas: ${banned}.`;
+  const prompt=`Devuélveme SOLO JSON {"vocabulario":[{sv,es}]×10}. Palabras útiles del día a día (incluye verbos y sustantivos comunes). No repitas ninguna de estas: ${banned}.`;
   for(let i=0;i<3;i++){
     const obj=safeJSON(await askOpenAI(prompt));
     if(obj?.vocabulario?.length===10){
@@ -169,16 +222,12 @@ async function fetchNewWords(){
 async function fetchLesson(words){
   setStatus('🛠️ Generando ejercicios…');
   const listado=words.map(w=>`${w.sv}:${w.es}`).join(', ');
-  const prompt=`Con estas 10 palabras (sueco:español): ${listado}.  
-Devuelve SOLO JSON:  
-1) "vocabulario": 10 objetos {sv,es,ej_sv,ej_es}. ej_es termina con 1 emoji.  
-2) "ejercicios": 10 objetos {es,sv}.  
-   – frases simples (nivel principiante) sin historia  
-   – 5 presente, 3 pasado, 2 futuro  
-   – exactamente 2 negativas y 2 interrogativas  
-   – cada ES usa 1 palabra nueva y termina con emoji  
-   – SV es la traducción sueca y termina con el MISMO emoji  
-3) "repaso": 20 objetos {es,sv} (10 nuevas + 10 del diccionario).`;
+  const grammar=getGrammarInstructions(nivel);
+  const prompt=`Tienes estas 10 palabras nuevas: ${listado}.
+Devuelve SOLO JSON:
+1) "vocabulario": 10 objetos {sv,es,ej_sv,ej_es}. ej_es termina con 1 emoji.
+2) "ejercicios": 10 objetos {es,sv}.\n${grammar}\n– Las frases deben respetar la gramática del nivel actual y de todos los niveles anteriores.\n– Cada ES usa una palabra nueva (todas deben aparecer) y termina con un emoji.\n– SV es la traducción sueca y termina con el MISMO emoji.
+3) "repaso": 20 objetos {es,sv} (10 nuevas + 10 del resto del diccionario).`;
   const obj=safeJSON(await askOpenAI(prompt));
   if(!obj)throw new Error('JSON lección inválido');
   ['vocabulario','ejercicios','repaso'].forEach(k=>{
@@ -188,8 +237,8 @@ Devuelve SOLO JSON:
     if(k==='repaso'){
       const sample=Object.values(v)[0];
       obj[k]=typeof sample==='string'
-              ? Object.entries(v).map(([es,sv])=>({es,sv}))
-              : Object.values(v);
+        ? Object.entries(v).map(([es,sv])=>({es,sv}))
+        : Object.values(v);
     }else obj[k]=Object.values(v);
   });
   return obj;
@@ -198,40 +247,27 @@ Devuelve SOLO JSON:
 /* ---------- render ---------- */
 function renderLesson(les){
   vocabEl.innerHTML=exEl.innerHTML=repEl.innerHTML='';
-
-  /* –– VOCABULARIO –– */
   les.vocabulario.forEach(w=>{
-    const sv   = w.sv            ?? w.en            ?? '';
-    const svEj = w.ej_sv ?? w.ej_sueco ?? w.ej_en   ?? '';
-    const esEj = w.ej_es ?? w.ej_espanol ?? w.ej    ?? '';
     vocabEl.insertAdjacentHTML('beforeend',
-      `<div class="item"><strong>${w.es}</strong> – ${sv}${speakIcon(sv)}<br>
-         <span class="example">
-           ${decodeEmojis(esEj)}<br>
-           <strong>${stripEmojis(svEj)}</strong>${speakIcon(svEj)}
-         </span>
-      </div>`);
+      `<div class="item"><strong>${w.es}</strong> – ${w.sv}${speakIcon(w.sv)}<br>
+       <span class="example">${decodeEmojis(w.ej_es)}<br>
+       <strong>${stripEmojis(w.ej_sv)}</strong>${speakIcon(w.ej_sv)}</span></div>`);
   });
-
-  /* –– EJERCICIOS –– */
   les.ejercicios.forEach((f,i)=>{
     exEl.insertAdjacentHTML('beforeend',
-      `<div class="item">${i+1}. ${decodeEmojis(f.es)}
+      `<div class="item">${i+1}. ${decodeEmojis(f.es)}
          <button class="show">Solución</button>
          <span class="hidden">${stripEmojis(f.sv)}${speakIcon(f.sv)}</span></div>`);
   });
-
-  /* –– REPASO –– */
   les.repaso.forEach(p=>{
-    const esTxt = p.es ?? p.espanol ?? (Array.isArray(p)?p[0]:Object.values(p)[0]);
-    const svTxt = p.sv ?? p.sueco   ?? (Array.isArray(p)?p[1]:Object.values(p)[1] ?? '');
+    const esTxt=p.es??p.espanol??(Array.isArray(p)?p[0]:Object.values(p)[0]);
+    const svTxt=p.sv??p.sueco??(Array.isArray(p)?p[1]:Object.values(p)[1]??'');
     repEl.insertAdjacentHTML('beforeend',
       `<div class="item">${decodeEmojis(esTxt)}
          <button class="show">Solución</button>
          <span class="hidden">${decodeEmojis(svTxt)}${speakIcon(svTxt)}</span></div>`);
   });
-
-  currentLesson = les;
+  currentLesson=les;
 }
 
 /* ---------- eventos ---------- */
@@ -246,15 +282,12 @@ document.addEventListener('click',e=>{
 /* ---------- flujo principal ---------- */
 async function generate(){
   try{
-    const words =await fetchNewWords(),
-          lesson=await fetchLesson(words);
-    const extra=dictionary.filter(d=>!words.some(w=>w.sv===d.sv))
-                          .sort(()=>Math.random()-0.5)
-                          .slice(0,10)
-                          .map(d=>({es:d.es,sv:d.sv}));
+    const words=await fetchNewWords();
+    const lesson=await fetchLesson(words);
+    const extra=dictionary.filter(d=>!words.some(w=>w.sv===d.sv)).sort(()=>Math.random()-0.5).slice(0,10).map(d=>({es:d.es,sv:d.sv}));
     lesson.repaso=[...words.map(w=>({es:w.es,sv:w.sv})),...extra];
     renderLesson(lesson);
-    setStatus('✅ Lección lista');
+    setStatus('✅ Lección lista (Nivel '+nivel+')');
     logEvent('iniciar_leccion');
   }catch(e){
     console.error(e);
@@ -262,14 +295,79 @@ async function generate(){
     setTimeout(()=>location.reload(),1500);
   }
 }
-window.addEventListener('load',()=>navigator.onLine?generate():setStatus('Sin conexión'));
+
+window.addEventListener('load',()=>{
+  /* ---------- Inicializar selector de nivel ---------- */
+  if(levelRadioList&&levelCurrent){
+    levelCurrent.textContent=`${nivel}.`;
+    levelRadioList.innerHTML=levels.map(l=>`
+      <div style="margin-bottom:.5rem">
+        <input type="radio" id="level-${l.id}" name="level-select" value="${l.id}" ${l.id===nivel?'checked':''}>
+        <label for="level-${l.id}" style="margin-left:.5rem">${l.id}. ${l.nombre} — ${l.descripcion}</label>
+      </div>`).join('');
+    /* Avanzar nivel */
+    levelNextBtn.onclick=function(){
+      if(nivel<levels.length){
+        nivel++;
+        localStorage.setItem(LEVEL_KEY,nivel);
+        levelCurrent.textContent=`${nivel}.`;
+        document.querySelectorAll('input[name="level-select"]').forEach(r=>{r.checked=r.value==nivel;});
+        // guardar vocabulario actual
+        if(currentLesson){
+          currentLesson.vocabulario.forEach(w=>{if(!dictionary.some(d=>d.sv===w.sv))dictionary.push({sv:w.sv,es:w.es});});
+          localStorage.setItem(DICT_KEY,JSON.stringify(dictionary));
+        }
+        logEvent('nivel_avanzar',`Nuevo nivel: ${nivel}`);
+        logEvent('terminar_leccion',`Palabras nuevas: ${currentLesson?.vocabulario?.length||0}`);
+        document.querySelectorAll('.item span:not(.hidden)').forEach(el=>el.classList.add('hidden'));
+        dictBox.classList.add('hidden');btnClear.classList.add('hidden');btnShow.textContent='Ver diccionario completo';
+        aboutText.classList.add('hidden');toggleAbout.textContent='▸ Sobre la aplicación';
+        window.scrollTo({top:0,left:0,behavior:'smooth'});
+        setTimeout(()=>location.reload(),500);
+      }
+    };
+    /* Mostrar selector */
+    levelToggleSelect.onclick=function(){
+      levelSelectWrap.classList.toggle('hidden');
+      if(!levelSelectWrap.classList.contains('hidden')){levelSelectWrap.style.display='block';logEvent('nivel_selector_abrir','Abre selector de nivel');}else{levelSelectWrap.style.display='';}
+    };
+    /* Guardar selección */
+    levelSaveBtn.onclick=function(){
+      const sel=document.querySelector('input[name="level-select"]:checked');
+      if(sel){
+        nivel=Number(sel.value);
+        localStorage.setItem(LEVEL_KEY,nivel);
+        levelCurrent.textContent=`${nivel}.`;
+        levelSelectWrap.classList.add('hidden');
+        if(currentLesson){
+          currentLesson.vocabulario.forEach(w=>{if(!dictionary.some(d=>d.sv===w.sv))dictionary.push({sv:w.sv,es:w.es});});
+          localStorage.setItem(DICT_KEY,JSON.stringify(dictionary));
+        }
+        logEvent('nivel_guardar',`Nivel guardado: ${nivel}`);
+        logEvent('terminar_leccion',`Palabras nuevas: ${currentLesson?.vocabulario?.length||0}`);
+        document.querySelectorAll('.item span:not(.hidden)').forEach(el=>el.classList.add('hidden'));
+        dictBox.classList.add('hidden');btnClear.classList.add('hidden');btnShow.textContent='Ver diccionario completo';
+        aboutText.classList.add('hidden');toggleAbout.textContent='▸ Sobre la aplicación';
+        window.scrollTo({top:0,left:0,behavior:'smooth'});
+        setTimeout(()=>location.reload(),500);
+      }
+    };
+    /* Botón nivel actual abre selector */
+    levelCurrentBtn.onclick=function(){
+      levelSelectWrap.classList.toggle('hidden');
+      if(!levelSelectWrap.classList.contains('hidden')){levelSelectWrap.style.display='block';logEvent('nivel_selector_abrir','Abre selector de nivel desde botón nivel actual');}else{levelSelectWrap.style.display='';}
+    };
+    levelRadioList.addEventListener('change',e=>{if(e.target&&e.target.matches('input[type="radio"]'))logEvent('nivel_radio_seleccion',`Seleccionado: ${e.target.value}`);});
+  }
+  navigator.onLine?generate():setStatus('Sin conexión');
+});
 
 /* ---------- botón FIN ---------- */
 document.getElementById('finish-btn').addEventListener('click',()=>{
+  const sel=document.querySelector('input[name="level-select"]:checked');
+  if(sel){nivel=Number(sel.value);localStorage.setItem(LEVEL_KEY,nivel);if(levelCurrent)levelCurrent.textContent=`${nivel}.`;}
   if(!currentLesson)return;
-  currentLesson.vocabulario.forEach(w=>{
-    if(!dictionary.some(d=>d.sv===w.sv))dictionary.push({sv:w.sv,es:w.es});
-  });
+  currentLesson.vocabulario.forEach(w=>{if(!dictionary.some(d=>d.sv===w.sv))dictionary.push({sv:w.sv,es:w.es});});
   localStorage.setItem(DICT_KEY,JSON.stringify(dictionary));
   logEvent('terminar_leccion',`Palabras nuevas: ${currentLesson.vocabulario.length}`);
   document.querySelectorAll('.item span:not(.hidden)').forEach(el=>el.classList.add('hidden'));
@@ -289,14 +387,13 @@ async function sendChat(){
   try{
     const a=await askOpenAI(`Actúa como profesor de sueco (niños 10‑11 años). Responde brevemente: ${q}`);
     chatBox.insertAdjacentHTML('beforeend',`<div><strong>ChatGPT:</strong> ${a}</div>`);chatBox.scrollTop=chatBox.scrollHeight;
-  }catch(e){chatBox.insertAdjacentHTML('beforeend',`<div style="color:#ff6b6b;">Error: ${e.message}</div>`);}
-}
+  }catch(e){chatBox.insertAdjacentHTML('beforeend',`<div style="color:#ff6b6b;">Error: ${e.message}</div>`);} }
 
 /* ---------- Diccionario completo ---------- */
 btnShow.addEventListener('click',()=>{
   if(dictBox.classList.contains('hidden')){
     const list=JSON.parse(localStorage.getItem(DICT_KEY)||'[]');
-    dictBox.textContent=list.length?list.map((w,i)=>`${i+1}. ${w.es} – ${w.sv}`).join('\n'):'(diccionario vacío)';
+    dictBox.textContent=list.length?list.map((w,i)=>`${i+1}. ${w.es} – ${w.sv}`).join('\n'):'(diccionario vacío)';
     dictBox.classList.remove('hidden');btnClear.classList.remove('hidden');btnShow.textContent='Ocultar diccionario';
     logEvent('click_boton','Mostrar diccionario');
   }else{
@@ -318,15 +415,17 @@ toggleAbout.addEventListener('click',()=>{
   logEvent('click_boton',open?'Mostrar sobre':'Ocultar sobre');
 });
 
-/* ---------- sugerencias ---------- */
+/* ---------- Sugerencias ---------- */
 function enviarSugerencia(){
-  const comentario=document.getElementById('sugerencia').value.trim(),
-        msg=document.getElementById('mensaje-enviado');
-  if(!comentario)return;
-  fetch('/.netlify/functions/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'sugerencia',details:comentario})})
-  .then(()=>{msg.style.display='block';document.getElementById('sugerencia').value='';setTimeout(()=>msg.style.display='none',3000);})
-  .catch(console.error);
+  const comentario=document.getElementById('sugerencia').value;const mensaje=document.getElementById('mensaje-enviado');if(!comentario.trim())return;
+  fetch('/.netlify/functions/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ip:'auto',action:'sugerencia',details:comentario,key:'TU_CLAVE'})})
+    .then(res=>res.json()).then(()=>{mensaje.style.display='block';document.getElementById('sugerencia').value='';setTimeout(()=>mensaje.style.display='none',3000);}).catch(console.error);
 }
+
+/* ---------- Ayuda flotante ---------- */
+function openHelpModal(e){e.preventDefault();e.stopPropagation();var helpModal=document.getElementById('help-modal');if(helpModal)helpModal.classList.add('visible');}
+const helpModal=document.getElementById('help-modal');
+if(helpModal){helpModal.querySelector('.close-help').onclick=function(e){e.preventDefault();e.stopPropagation();helpModal.classList.remove('visible');};document.addEventListener('keydown',function(e){if(helpModal.classList.contains('visible')&&e.key==='Escape')helpModal.classList.remove('visible');});}
 </script>
 </body>
 </html>
