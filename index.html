@@ -723,13 +723,13 @@ async function fetchLesson(words, isDebugMode = false, debugInfo = ''){
   try {
     const frasesParaApp = await cargarFrasesParaApp();
     
-    if (modoEnfocado) {
-      // MODO REFORZAR: Solo frases del nivel actual
+    if (modoEnfocado || nivel === 1) {
+      // MODO REFORZAR O NIVEL 1: Solo frases del nivel actual (10 ejercicios)
       const frasesNivelActual = frasesParaApp[nivel.toString()]?.frases || [];
       ejercicios = seleccionarFrasesAleatorias(frasesNivelActual, 10);
       
     } else {
-      // MODO REPASO: 5 del nivel actual + 5 de niveles inferiores
+      // MODO REPASO (niveles 2+): 5 del nivel actual + 5 de niveles inferiores
       const frasesNivelActual = frasesParaApp[nivel.toString()]?.frases || [];
       const frasesNivelActualSeleccionadas = seleccionarFrasesAleatorias(frasesNivelActual, 5);
       
@@ -747,7 +747,7 @@ async function fetchLesson(words, isDebugMode = false, debugInfo = ''){
   } catch (error) {
     console.error('Error cargando frases de ejercicios:', error);
     // Fallback al sistema anterior
-    if (modoEnfocado) {
+    if (modoEnfocado || nivel === 1) {
       const frasesNivelActual = await cargarFrasesNivel(nivel);
       const frasesDisponibles = obtenerFrasesNoUsadas(nivel, frasesNivelActual);
       ejercicios = seleccionarFrasesAleatorias(frasesDisponibles, 10);
