@@ -173,9 +173,36 @@
 <p id="status"></p>
 <p id="debug-status" style="color:var(--accent);margin-top:0.5rem;font-size:0.9rem;"></p>
 
-<section><h2>Vocabulario</h2><p class="note">Copia 10 veces cada palabra en tu cuaderno para aprenderlas.</p><div id="vocab-list"></div></section>
-<section><h2>Ejercicios</h2><p class="note">Traduce al sueco en tu cuaderno y, si encuentras palabras que no conoces, cópialas diez veces para aprenderlas.</p><div id="grammar-explanation" style="background:var(--surface);padding:1rem;border-radius:var(--rad);margin-bottom:1rem;border-left:4px solid var(--primary);"></div><div id="exercise-list"></div></section>
-<section><h2>Repaso</h2><p class="note">Traduce estas palabras al sueco en tu cuaderno y, si alguna no te la sabes, cópiala diez veces para aprenderla.</p><div id="review-list"></div></section>
+<section>
+  <h2 style="margin-bottom:0">
+    <button id="toggle-vocab" style="all:unset;cursor:pointer;color:var(--primary)">▸ Vocabulario</button>
+  </h2>
+  <div id="vocab-content" class="hidden" style="margin-top:.5rem">
+    <p class="note">Copia 10 veces cada palabra en tu cuaderno para aprenderlas.</p>
+    <div id="vocab-list"></div>
+  </div>
+</section>
+
+<section>
+  <h2 style="margin-bottom:0">
+    <button id="toggle-exercises" style="all:unset;cursor:pointer;color:var(--primary)">▸ Ejercicios</button>
+  </h2>
+  <div id="exercises-content" class="hidden" style="margin-top:.5rem">
+    <p class="note">Traduce al sueco en tu cuaderno y, si encuentras palabras que no conoces, cópialas diez veces para aprenderlas.</p>
+    <div id="grammar-explanation" style="background:var(--surface);padding:1rem;border-radius:var(--rad);margin-bottom:1rem;border-left:4px solid var(--primary);"></div>
+    <div id="exercise-list"></div>
+  </div>
+</section>
+
+<section>
+  <h2 style="margin-bottom:0">
+    <button id="toggle-review" style="all:unset;cursor:pointer;color:var(--primary)">▸ Repaso</button>
+  </h2>
+  <div id="review-content" class="hidden" style="margin-top:.5rem">
+    <p class="note">Traduce estas palabras al sueco en tu cuaderno y, si alguna no te la sabes, cópiala diez veces para aprenderla.</p>
+    <div id="review-list"></div>
+  </div>
+</section>
 
 <section>
   <h2>Chat con tu profesor virtual</h2>
@@ -1440,6 +1467,42 @@ function stripEmojis(str) {
   if (typeof str !== 'string') return '';
   return str.replace(/[\u{1F600}-\u{1F64F}]/gu, '').trim(); // Basic emojis
 }
+
+/* ---------- Secciones desplegables ---------- */
+(function initCollapsibleSections(){
+  // Vocabulario
+  const toggleVocab = document.getElementById('toggle-vocab');
+  const vocabContent = document.getElementById('vocab-content');
+  if(toggleVocab && vocabContent){
+    toggleVocab.addEventListener('click',()=>{
+      const open=!vocabContent.classList.toggle('hidden');
+      toggleVocab.textContent=(open?'▾':'▸')+' Vocabulario';
+      logEvent('click_boton', open?'Mostrar vocabulario':'Ocultar vocabulario');
+    });
+  }
+  
+  // Ejercicios
+  const toggleExercises = document.getElementById('toggle-exercises');
+  const exercisesContent = document.getElementById('exercises-content');
+  if(toggleExercises && exercisesContent){
+    toggleExercises.addEventListener('click',()=>{
+      const open=!exercisesContent.classList.toggle('hidden');
+      toggleExercises.textContent=(open?'▾':'▸')+' Ejercicios';
+      logEvent('click_boton', open?'Mostrar ejercicios':'Ocultar ejercicios');
+    });
+  }
+  
+  // Repaso
+  const toggleReview = document.getElementById('toggle-review');
+  const reviewContent = document.getElementById('review-content');
+  if(toggleReview && reviewContent){
+    toggleReview.addEventListener('click',()=>{
+      const open=!reviewContent.classList.toggle('hidden');
+      toggleReview.textContent=(open?'▾':'▸')+' Repaso';
+      logEvent('click_boton', open?'Mostrar repaso':'Ocultar repaso');
+    });
+  }
+})();
 
 </script>
 </body>
