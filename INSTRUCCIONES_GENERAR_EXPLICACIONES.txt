@@ -1,0 +1,106 @@
+INSTRUCCIONES – Generar descripciones de gramática por nivel
+
+1) Objetivo
+- Generar explicaciones breves (1–2 líneas) para cada uno de los 25 niveles gramaticales.
+- Guardarlas en un JSON estructurado para consumo directo en la app web.
+- Carga en frontend desde archivo local, con fallback a API solo si faltara el archivo.
+
+2) Requisitos
+- Python 3.9+ instalado.
+- Clave de OpenAI en un archivo .env (variable: OPENAI_API_KEY).
+- Dependencias Python: ver generators/requirements.txt.
+
+3) Preparación del entorno
+- Crear o verificar .env en la raíz del proyecto (o en /generators si esa es tu convención):
+  OPENAI_API_KEY=tu_clave_de_openai
+- Instalar dependencias:
+  cd generators
+  pip install -r requirements.txt
+
+4) Archivos clave
+- generators/config.py
+  - NIVELES: fuente de verdad de los 25 niveles (id, descripcion).
+  - MODEL_FEW_SHOT: modelo usado para generar las explicaciones (recomendado: gpt-4o).
+  - EXPLICACIONES_FILE: ruta de salida (por defecto: output/explicaciones_gramatica.json).
+  - Parámetros de rate limit si fueran necesarios.
+- generators/explicacion_generator.py
+  - Recorre NIVELES → genera una explicación por nivel.
+  - Estilo: 1–2 líneas, lenguaje para 10–11 años, ≤ ~35 palabras, 0–1 ejemplo integrado.
+  - Respuesta estricta en JSON; limpieza/validación y fallback seguro.
+- generators/main.py
+  - Orquestación CLI con acción “explicaciones”.
+
+5) Generación de explicaciones
+- Comando:
+  cd generators
+  python main.py explicaciones
+- Resultado:
+  generators/output/explicaciones_gramatica.json
+
+6) Copiar a la app (para que el frontend las cargue)
+- Carpeta destino: data/ en la raíz del proyecto.
+- Windows (CMD/PowerShell):
+  if not exist data mkdir data & copy /Y generators\output\explicaciones_gramatica.json data\explicaciones_gramatica.json
+- macOS/Linux:
+  mkdir -p data && cp -f generators/output/explicaciones_gramatica.json data/explicaciones_gramatica.json
+
+7) Integración en el frontend
+- index.html intenta primero leer data/explicaciones_gramatica.json y, si no existe o no encuentra la entrada del nivel, hace fallback a API.
+- Para uso 100% offline, elimina el bloque de fallback a askOpenAI en la generación de la explicación o deja un mensaje local por defecto.
+
+8) Verificación rápida
+- Inicia la app y genera una lección.
+- Debajo de “Ejercicios” debería aparecer:
+  “📚 Gramática del nivel X: [descripción del nivel]” + el texto de la explicación cargada desde el archivo local.
+- No deberían verse llamadas a la API para esta sección si el archivo existe y tiene el nivel correspondiente.
+
+9) Mantenimiento y personalización
+- Cambiar modelo:
+  Editar MODEL_FEW_SHOT en generators/config.py (p. ej., gpt-4o / gpt-4o-mini).
+- Actualizar niveles:
+  Editar NIVELES (id, descripcion) y volver a ejecutar:
+    python generators/main.py explicaciones
+- Ajustar tiempos/pausas:
+  Revisar valores de rate limit en config.py si fuera necesario.
+
+10) Criterios de estilo de las explicaciones (lo que genera el script)
+- 1–2 líneas máximo, español claro, tono para 10–11 años.
+- ≤ ~35 palabras por explicación.
+- Puede incluir 1 ejemplo simple en línea, no obligatorio.
+- No usar listas, ni Markdown, ni emojis (las explicaciones deben ser limpias y breves).
+- Deben aludir exactamente a la “descripcion” del nivel correspondiente.
+
+11) Estructura del JSON de salida
+{
+  "metadata": {
+    "total_niveles": 25,
+    "fecha_creacion": "ISO-8601",
+    "modelo": "gpt-4o",
+    "version_script": "1.0"
+  },
+  "niveles": [
+    { "nivel": 1, "descripcion": "…", "explicacion": "…" },
+    ...
+    { "nivel": 25, "descripcion": "…", "explicacion": "…" }
+  ]
+}
+
+12) Problemas frecuentes y soluciones
+- “ModuleNotFoundError: dotenv” → Ejecuta “pip install -r requirements.txt”.
+- “Falta la clave” → Asegúrate de tener OPENAI_API_KEY en .env (y que el proceso la lea).
+- “No se ve la explicación en la app”:
+  - Verifica que data/explicaciones_gramatica.json existe y es accesible.
+  - Comprueba que la clave “nivel” coincide con el nivel actual y que el campo “explicacion” no está vacío.
+  - Si falta, el frontend usará el fallback a la API (ver consola).
+- Rate limit → Vuelve a lanzar el comando; el generador hace limpieza/validación y soporta reintentos.
+
+13) Comandos rápidos
+- Instalar dependencias:
+  cd generators
+  pip install -r requirements.txt
+- Generar explicaciones:
+  python main.py explicaciones
+- Copiar a la app:
+  Windows: if not exist data mkdir data & copy /Y generators\output\explicaciones_gramatica.json data\explicaciones_gramatica.json
+  macOS/Linux: mkdir -p data && cp -f generators/output/explicaciones_gramatica.json data/explicaciones_gramatica.json
+- Ejecutar app y verificar la explicación debajo de “Ejercicios”.

@@ -1,0 +1,176 @@
+PROMPT PARA CURSOR - Implementar Secciones Desplegables con Memoria Local
+
+Objetivo:
+Transformar las secciones de Vocabulario, Ejercicios y Repaso en secciones desplegables que recuerden su estado (abierto/cerrado) usando localStorage, similar a como funciona la sección "Sobre la aplicación".
+
+Cambios necesarios en el HTML:
+
+1. Modificar las secciones principales (reemplazar las secciones actuales):
+
+<!-- Reemplazar las secciones actuales de Vocabulario, Ejercicios y Repaso con: -->
+
+<section>
+  <h2 style="margin-bottom:0">
+    <button id="toggle-vocab" style="all:unset;cursor:pointer;color:var(--primary)">▸ Vocabulario</button>
+  </h2>
+  <div id="vocab-content" class="hidden" style="margin-top:.5rem">
+    <p class="note">Copia 10 veces cada palabra en tu cuaderno para aprenderlas.</p>
+    <div id="vocab-list"></div>
+  </div>
+</section>
+
+<section>
+  <h2 style="margin-bottom:0">
+    <button id="toggle-exercises" style="all:unset;cursor:pointer;color:var(--primary)">▸ Ejercicios</button>
+  </h2>
+  <div id="exercises-content" class="hidden" style="margin-top:.5rem">
+    <p class="note">Traduce al inglés en tu cuaderno y, si encuentras palabras que no conoces, cópialas diez veces para aprenderlas.</p>
+    <div id="grammar-explanation" style="background:var(--surface);padding:1rem;border-radius:var(--rad);margin-bottom:1rem;border-left:4px solid var(--primary);"></div>
+    <div id="exercise-list"></div>
+  </div>
+</section>
+
+<section>
+  <h2 style="margin-bottom:0">
+    <button id="toggle-review" style="all:unset;cursor:pointer;color:var(--primary)">▸ Repaso</button>
+  </h2>
+  <div id="review-content" class="hidden" style="margin-top:.5rem">
+    <p class="note">Traduce estas palabras al inglés en tu cuaderno y, si alguna no te la sabes, cópiala diez veces para aprenderla.</p>
+    <div id="review-list"></div>
+  </div>
+</section>
+
+Cambios necesarios en el JavaScript:
+
+2. Añadir constantes para localStorage (después de las constantes existentes):
+
+// Claves para el estado de las secciones desplegables
+const VOCAB_SECTION_KEY = 'curso_ingles_vocab_section';
+const EXERCISES_SECTION_KEY = 'curso_ingles_exercises_section';
+const REVIEW_SECTION_KEY = 'curso_ingles_review_section';
+const ABOUT_SECTION_KEY = 'curso_ingles_about_section';
+
+3. Crear la función principal para manejar secciones desplegables (añadir después de las funciones existentes):
+
+/* ---------- Secciones desplegables ---------- */
+(function initCollapsibleSections(){
+  // Función helper para obtener el estado guardado (por defecto true = abierto)
+  function getSectionState(key, defaultValue = true) {
+    const saved = localStorage.getItem(key);
+    return saved === null ? defaultValue : saved === 'true';
+  }
+  
+  // Función helper para guardar el estado
+  function saveSectionState(key, isOpen) {
+    localStorage.setItem(key, isOpen.toString());
+  }
+  
+  // Función helper para actualizar el botón y contenido
+  function updateSection(toggleBtn, content, isOpen, sectionName) {
+    if (isOpen) {
+      content.classList.remove('hidden');
+      toggleBtn.textContent = '▾ ' + sectionName;
+    } else {
+      content.classList.add('hidden');
+      toggleBtn.textContent = '▸ ' + sectionName;
+    }
+  }
+  
+  // Vocabulario
+  const toggleVocab = document.getElementById('toggle-vocab');
+  const vocabContent = document.getElementById('vocab-content');
+  if(toggleVocab && vocabContent){
+    // Aplicar estado guardado al cargar
+    const vocabOpen = getSectionState(VOCAB_SECTION_KEY, true);
+    updateSection(toggleVocab, vocabContent, vocabOpen, 'Vocabulario');
+    
+    toggleVocab.addEventListener('click',()=>{
+      const isOpen = !vocabContent.classList.contains('hidden');
+      const newState = !isOpen;
+      updateSection(toggleVocab, vocabContent, newState, 'Vocabulario');
+      saveSectionState(VOCAB_SECTION_KEY, newState);
+      logEvent('click_boton', newState?'Mostrar vocabulario':'Ocultar vocabulario');
+    });
+  }
+  
+  // Ejercicios
+  const toggleExercises = document.getElementById('toggle-exercises');
+  const exercisesContent = document.getElementById('exercises-content');
+  if(toggleExercises && exercisesContent){
+    // Aplicar estado guardado al cargar
+    const exercisesOpen = getSectionState(EXERCISES_SECTION_KEY, true);
+    updateSection(toggleExercises, exercisesContent, exercisesOpen, 'Ejercicios');
+    
+    toggleExercises.addEventListener('click',()=>{
+      const isOpen = !exercisesContent.classList.contains('hidden');
+      const newState = !isOpen;
+      updateSection(toggleExercises, exercisesContent, newState, 'Ejercicios');
+      saveSectionState(EXERCISES_SECTION_KEY, newState);
+      logEvent('click_boton', newState?'Mostrar ejercicios':'Ocultar ejercicios');
+    });
+  }
+  
+  // Repaso
+  const toggleReview = document.getElementById('toggle-review');
+  const reviewContent = document.getElementById('review-content');
+  if(toggleReview && reviewContent){
+    // Aplicar estado guardado al cargar
+    const reviewOpen = getSectionState(REVIEW_SECTION_KEY, true);
+    updateSection(toggleReview, reviewContent, reviewOpen, 'Repaso');
+    
+    toggleReview.addEventListener('click',()=>{
+      const isOpen = !reviewContent.classList.contains('hidden');
+      const newState = !isOpen;
+      updateSection(toggleReview, reviewContent, newState, 'Repaso');
+      saveSectionState(REVIEW_SECTION_KEY, newState);
+      logEvent('click_boton', newState?'Mostrar repaso':'Ocultar repaso');
+    });
+  }
+})();
+
+4. Modificar la función existente de "Sobre la aplicación" para que también recuerde su estado:
+
+/* ---------- Sobre la aplicación ---------- */
+(function initAbout(){
+  const _toggleAbout = document.getElementById('toggle-about');
+  const _aboutText = document.getElementById('about-text');
+  if(_toggleAbout && _aboutText){
+    // Aplicar estado guardado al cargar (por defecto cerrado)
+    const aboutOpen = getSectionState(ABOUT_SECTION_KEY, false);
+    updateSection(_toggleAbout, _aboutText, aboutOpen, 'Sobre la aplicación');
+    
+    _toggleAbout.addEventListener('click',()=>{
+      const isOpen = !_aboutText.classList.contains('hidden');
+      const newState = !isOpen;
+      updateSection(_toggleAbout, _aboutText, newState, 'Sobre la aplicación');
+      saveSectionState(ABOUT_SECTION_KEY, newState);
+      logEvent('click_boton', newState?'Mostrar sobre':'Ocultar sobre');
+    });
+  }
+})();
+
+Notas importantes:
+
+1. Adaptar las claves de localStorage: Cambia 'curso_ingles_' por el prefijo que uses en tu aplicación de inglés.
+
+2. Estados por defecto:
+   - Vocabulario, Ejercicios, Repaso: Abiertos por defecto (true)
+   - Sobre la aplicación: Cerrado por defecto (false)
+
+3. Funcionalidad:
+   - Al hacer click en "▸ Vocabulario" → se abre y cambia a "▾ Vocabulario"
+   - Al hacer click en "▾ Vocabulario" → se cierra y cambia a "▸ Vocabulario"
+   - El estado se guarda automáticamente en localStorage
+   - Al recargar la página, se restaura el estado guardado
+
+4. Logging: Se mantiene el sistema de logging existente para tracking de uso.
+
+5. Compatibilidad: Esta implementación es compatible con el sistema existente y no interfiere con otras funcionalidades.
+
+Resultado esperado:
+- Las secciones principales serán desplegables
+- El usuario podrá abrir/cerrar las secciones según su preferencia
+- La aplicación recordará el estado de cada sección entre sesiones
+- La interfaz será más limpia y permitirá enfocarse en secciones específicas
+
+Copia y pega este prompt completo en Cursor para implementar la funcionalidad en tu programa de inglés.
