@@ -1,0 +1,137 @@
+{
+  "metadata": {
+    "total_niveles": 25,
+    "fecha_creacion": "2025-08-11T17:00:26.856480",
+    "modelo": "gpt-4o",
+    "version_script": "1.0",
+    "niveles_generados": 25,
+    "errores": []
+  },
+  "niveles": [
+    {
+      "nivel": 1,
+      "descripcion": "Verbo 'vara' (ser/estar) y 'ha' (tener) en presente",
+      "explicacion": "En sueco, usamos \"är\" para decir \"ser/estar\" y \"har\" para \"tener\". Por ejemplo, \"Jag är glad\" significa \"Yo estoy feliz\" y \"Jag har en katt\" significa \"Yo tengo un gato\"."
+    },
+    {
+      "nivel": 2,
+      "descripcion": "Formación básica de oraciones afirmativas (orden S-V-O)",
+      "explicacion": "En sueco, una oración afirmativa simple se forma colocando primero el sujeto (S), luego el verbo (V) y al final el objeto (O), por ejemplo: \"Katten (S) äter (V) fisk (O)\" significa \"El gato come pescado\"."
+    },
+    {
+      "nivel": 3,
+      "descripcion": "Artículos definidos e indefinidos (en/ett, -en/-et, -n/-t)",
+      "explicacion": "En sueco, los artículos indefinidos \"en\" y \"ett\" se usan como \"un\" o \"una\", y los definidos se añaden al final: \"en bok\" (un libro), \"boken\" (el libro); \"ett hus\" (una casa), \"huset\" (la casa)."
+    },
+    {
+      "nivel": 4,
+      "descripcion": "Sustantivos en singular y plural (tipos de plural)",
+      "explicacion": "En sueco, para formar el plural, a veces se agrega \"-or\", \"-ar\" o \"-er\" al final del sustantivo, como \"katt\" (gato) que se convierte en \"katter\" (gatos)."
+    },
+    {
+      "nivel": 5,
+      "descripcion": "Adjetivos en forma básica (atributiva) y concordancia",
+      "explicacion": "En sueco, los adjetivos en forma básica describen sustantivos y deben concordar con el género y número: \"en grön bil\" (un coche verde) para en-ord y \"ett grönt hus\" (una casa verde) para ett-ord."
+    },
+    {
+      "nivel": 6,
+      "descripcion": "Negación con 'inte' (posición en la frase)",
+      "explicacion": "En sueco, para negar algo usamos \"inte\" después del verbo principal: \"Jag gillar inte choklad\" significa \"No me gusta el chocolate\"."
+    },
+    {
+      "nivel": 7,
+      "descripcion": "Verbos regulares en presente y pasado (grupos verbales)",
+      "explicacion": "En sueco, los verbos regulares en presente terminan en -ar, -er o -r, como \"pratar\" (hablar), y en pasado se transforman a -ade, -de o -te, como \"pratade\" (habló/hablaba)."
+    },
+    {
+      "nivel": 8,
+      "descripcion": "Pronombres posesivos (min, mitt, mina, etc.)",
+      "explicacion": "Los pronombres posesivos en sueco como \"min\", \"mitt\" y \"mina\" indican que algo te pertenece, y se usan según el género y número del objeto: \"min bok\" (mi libro), \"mitt hus\" (mi casa), \"mina böcker\" (mis libros)."
+    },
+    {
+      "nivel": 9,
+      "descripcion": "Preguntas con pronombres interrogativos (vad, vem, var, hur…)",
+      "explicacion": "En sueco, usamos palabras como \"vad\" (qué), \"vem\" (quién), \"var\" (dónde) y \"hur\" (cómo) al inicio de una pregunta para obtener información, por ejemplo: \"Vad heter du?\" significa \"¿Cómo te llamas?\"."
+    },
+    {
+      "nivel": 10,
+      "descripcion": "Orden de palabras en preguntas y con adverbios iniciales (regla V2)",
+      "explicacion": "En sueco, el verbo va segundo en preguntas y frases con adverbios al inicio. Por ejemplo, \"Varför spelar du?\" significa \"¿Por qué juegas?\". Aquí \"spelar\" (verbo) va después de \"varför\" (adverbio)."
+    },
+    {
+      "nivel": 11,
+      "descripcion": "Adjetivos en forma predicativa (después de 'vara')",
+      "explicacion": "En sueco, los adjetivos cambian para describir algo después del verbo \"vara\" (ser o estar). Por ejemplo, \"El gato es grande\" se dice \"Katten är stor\", usando \"stor\" después de \"är\"."
+    },
+    {
+      "nivel": 12,
+      "descripcion": "Preposiciones más comunes (i, på, till, från, med, om…)",
+      "explicacion": "Las preposiciones en sueco, como \"i\", \"på\", \"till\", \"från\" y \"med\", nos ayudan a describir dónde, cómo o hacia dónde va algo, por ejemplo, \"Jag åker till skolan\" significa \"Voy a la escuela\"."
+    },
+    {
+      "nivel": 13,
+      "descripcion": "Verbos modales (kan, vill, måste, får, ska, bör)",
+      "explicacion": "Los verbos modales en sueco, como \"kan\" (puedo), \"vill\" (quiero), \"måste\" (debo), \"får\" (puedo), \"ska\" (voy a) y \"bör\" (debería), se usan para expresar posibilidad, deseo, obligación, permiso y planes; por ejemplo, \"Jag kan simma\" significa \"Yo puedo nadar\"."
+    },
+    {
+      "nivel": 14,
+      "descripcion": "Comparativos y superlativos de adjetivos",
+      "explicacion": "En sueco, para comparar adjetivos, añade \"-are\" para el comparativo (\"stark\" se convierte en \"starkare\") y \"-ast\" para el superlativo (\"stark\" se convierte en \"starkast\") para decir que alguien o algo es más fuerte o el más fuerte."
+    },
+    {
+      "nivel": 15,
+      "descripcion": "Tiempos perfectos: perfekt y pluskvamperfekt (har gjort, hade gjort)",
+      "explicacion": "En sueco, usamos \"har gjort\" para decir \"he hecho\" (perfekt) y \"hade gjort\" para \"había hecho\" (pluskvamperfekt), indicando acciones completadas en el presente o pasado, como en \"Jag har läst boken\" (He leído el libro)."
+    },
+    {
+      "nivel": 16,
+      "descripcion": "Pronombres objeto (mig, dig, honom, henne…)",
+      "explicacion": "En sueco, los pronombres objeto como \"mig\" (me), \"dig\" (te), \"honom\" (lo) y \"henne\" (la) se usan para decir a quién afecta la acción; por ejemplo, \"Han ser mig\" significa \"Él me ve\"."
+    },
+    {
+      "nivel": 17,
+      "descripcion": "Partículas verbales y verbos separables (gå ut, komma tillbaka)",
+      "explicacion": "En sueco, algunas palabras pequeñas llamadas partículas se unen a verbos para cambiar su significado, como \"gå ut\" (salir) o \"komma tillbaka\" (volver), y a veces pueden separarse en una oración."
+    },
+    {
+      "nivel": 18,
+      "descripcion": "Frases subordinadas (con att, om, när, eftersom)",
+      "explicacion": "En sueco, usamos \"att\", \"om\", \"när\" y \"eftersom\" para conectar ideas en una oración; por ejemplo, \"Jag vet att du är glad\" significa \"Sé que estás feliz\"."
+    },
+    {
+      "nivel": 19,
+      "descripcion": "Voz pasiva (-s y 'bli')",
+      "explicacion": "En sueco, usamos la terminación \"-s\" o la palabra \"bli\" para decir que algo le pasa a alguien o algo; por ejemplo, \"brevet skrivs av mig\" significa \"la carta es escrita por mí\"."
+    },
+    {
+      "nivel": 20,
+      "descripcion": "Verbos reflexivos (klä på sig, känna sig)",
+      "explicacion": "Los verbos reflexivos en sueco indican que la acción recae sobre quien la realiza y terminan en \"sig\", como en \"klä på sig\" (vestirse) o \"känna sig\" (sentirse). Ejemplo: \"Jag klär på mig\" significa \"Yo me visto\"."
+    },
+    {
+      "nivel": 21,
+      "descripcion": "Uso avanzado del orden V2 en oraciones largas",
+      "explicacion": "En sueco, en oraciones largas, el verbo siempre va en segundo lugar (V2), incluso si la oración empieza con otra palabra; por ejemplo, \"Igår åt jag en smörgås\" significa \"Ayer comí un sándwich\"."
+    },
+    {
+      "nivel": 22,
+      "descripcion": "Pronombres relativos (som, vilken, vars)",
+      "explicacion": "Los pronombres relativos en sueco como \"som\", \"vilken\" y \"vars\" conectan dos partes de una oración; por ejemplo, \"bilen som jag såg\" significa \"el coche que vi\"."
+    },
+    {
+      "nivel": 23,
+      "descripcion": "Oraciones condicionales y subjuntivo moderno (skulle, om…)",
+      "explicacion": "En sueco, usamos \"skulle\" con \"om\" para decir \"si algo pasara, entonces haría esto\", por ejemplo: \"Om jag hade pengar, skulle jag köpa godis\" significa \"Si tuviera dinero, compraría dulces\"."
+    },
+    {
+      "nivel": 24,
+      "descripcion": "Adverbios de frecuencia, modo y grado (ofta, gärna, mycket)",
+      "explicacion": "Los adverbios de frecuencia, modo y grado en sueco como \"ofta\" (a menudo), \"gärna\" (con gusto) y \"mycket\" (mucho) ayudan a describir con qué frecuencia, cómo o cuánto hacemos algo, por ejemplo: \"Jag läser ofta böcker\" significa \"Leo libros a menudo\"."
+    },
+    {
+      "nivel": 25,
+      "descripcion": "Construcciones impersonales y pasivas con 'man' y 'det'",
+      "explicacion": "En sueco, usamos \"man\" para decir que \"alguien\" hace algo sin mencionar quién, como en \"Man äter frukost\" (Se desayuna), y \"det\" para describir acciones impersonales, como \"Det regnar\" (Llueve)."
+    }
+  ]
+}

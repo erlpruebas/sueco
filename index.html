@@ -411,6 +411,9 @@ let frasesParaAppCache = null;
 let vocabularioCache = null;
 let ejemplosUsados = {};
 
+  // Cache para explicaciones de gramática
+  let explicacionesGramaticaCache = null;
+
 // Función para cargar el diccionario completo traducido
 async function cargarDiccionarioCompleto() {
   if (diccionarioCompletoCache) {
@@ -466,6 +469,31 @@ async function cargarEjemplosVocabulario() {
     return vocabularioCache;
   } catch (error) {
     console.error('Error cargando ejemplos de vocabulario:', error);
+    return {};
+  }
+}
+
+// Función para cargar explicaciones de gramática (por nivel)
+async function cargarExplicacionesGramatica() {
+  if (explicacionesGramaticaCache) {
+    return explicacionesGramaticaCache;
+  }
+  try {
+    const response = await fetch('data/explicaciones_gramatica.json');
+    if (!response.ok) {
+      throw new Error('Error cargando explicaciones de gramática');
+    }
+    const data = await response.json();
+    const map = {};
+    (data.niveles || []).forEach(n => {
+      if (n && typeof n.nivel === 'number') {
+        map[n.nivel] = { descripcion: n.descripcion, explicacion: n.explicacion };
+      }
+    });
+    explicacionesGramaticaCache = map;
+    return explicacionesGramaticaCache;
+  } catch (error) {
+    console.error('Error cargando explicaciones de gramática:', error);
     return {};
   }
 }
@@ -734,13 +762,14 @@ function obtenerEjemploVocabulario(palabra) {
 async function fetchLesson(words, isDebugMode = false, debugInfo = ''){
   setStatusWithTimer('🛠️ Cargando ejercicios…', debugInfo);
   
-  // Generar explicación gramatical (con manejo de errores)
+  // Obtener explicación gramatical desde archivo local (con manejo de errores)
   let grammarExplanation = '';
   try {
-    const grammarExplanationPrompt = `Explica brevemente (1-2 líneas) la gramática del nivel ${nivel}: "${levels[nivel-1].descripcion}" para un estudiante de 10-11 años.`;
-    grammarExplanation = await askOpenAI(grammarExplanationPrompt);
+    const explicaciones = await cargarExplicacionesGramatica();
+    const entry = explicaciones[nivel];
+    grammarExplanation = (entry && entry.explicacion) ? entry.explicacion : `Gramática del nivel ${nivel}: ${levels[nivel-1].descripcion}`;
   } catch (e) {
-    console.error('Error generando explicación gramatical:', e);
+    console.error('Error obteniendo explicación gramatical:', e);
     grammarExplanation = `Gramática del nivel ${nivel}: ${levels[nivel-1].descripcion}`;
   }
 
@@ -879,7 +908,8 @@ async function generate(isDebugMode = false){
     await Promise.all([
       cargarDiccionarioCompleto(),
       cargarFrasesParaApp(),
-      cargarEjemplosVocabulario()
+      cargarEjemplosVocabulario(),
+      cargarExplicacionesGramatica()
     ]);
     
     const words = await fetchNewWords(window.isDebugMode, debugInfo);
