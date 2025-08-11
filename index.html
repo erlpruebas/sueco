@@ -366,6 +366,9 @@ function applyTheme(themeName){
 let dictionary = JSON.parse(localStorage.getItem(DICT_KEY) || '[]');
 let currentLesson = null;
 
+// === NUEVO: para modo automático ===
+let allSessions = JSON.parse(localStorage.getItem(SESSIONS_KEY) || '[]');
+
 let nivel = Number(localStorage.getItem(LEVEL_KEY) || 1);
 let modoEnfocado = localStorage.getItem('curso_sueco_modo_enfocado') === 'true';
 const levels = [
@@ -1193,23 +1196,7 @@ async function sendChat(){
 })();
 
 /* ---------- Sobre la aplicación ---------- */
-(function initAbout(){
-  const _toggleAbout = document.getElementById('toggle-about');
-  const _aboutText = document.getElementById('about-text');
-  if(_toggleAbout && _aboutText){
-    // Aplicar estado guardado al cargar (por defecto cerrado)
-    const aboutOpen = getSectionState(ABOUT_SECTION_KEY, false);
-    updateSection(_toggleAbout, _aboutText, aboutOpen, 'Sobre la aplicación');
-    
-    _toggleAbout.addEventListener('click',()=>{
-      const isOpen = !_aboutText.classList.contains('hidden');
-      const newState = !isOpen;
-      updateSection(_toggleAbout, _aboutText, newState, 'Sobre la aplicación');
-      saveSectionState(ABOUT_SECTION_KEY, newState);
-      logEvent('click_boton', newState?'Mostrar sobre':'Ocultar sobre');
-    });
-  }
-})();
+// La implementación se movió a initCollapsibleSections() para evitar problemas de orden de carga
 
 function enviarSugerencia() {
   const comentario = document.getElementById('sugerencia').value;
@@ -1567,6 +1554,23 @@ function updateSection(toggleBtn, content, isOpen, sectionName) {
       updateSection(toggleReview, reviewContent, newState, 'Repaso');
       saveSectionState(REVIEW_SECTION_KEY, newState);
       logEvent('click_boton', newState?'Mostrar repaso':'Ocultar repaso');
+    });
+  }
+
+  // Sobre la aplicación (siempre cerrado por defecto)
+  const toggleAbout = document.getElementById('toggle-about');
+  const aboutText = document.getElementById('about-text');
+  if(toggleAbout && aboutText){
+    // Aplicar estado guardado al cargar (por defecto cerrado)
+    const aboutOpen = getSectionState(ABOUT_SECTION_KEY, false);
+    updateSection(toggleAbout, aboutText, aboutOpen, 'Sobre la aplicación');
+    
+    toggleAbout.addEventListener('click',()=>{
+      const isOpen = !aboutText.classList.contains('hidden');
+      const newState = !isOpen;
+      updateSection(toggleAbout, aboutText, newState, 'Sobre la aplicación');
+      saveSectionState(ABOUT_SECTION_KEY, newState);
+      logEvent('click_boton', newState?'Mostrar sobre':'Ocultar sobre');
     });
   }
 })();
