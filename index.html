@@ -232,6 +232,7 @@
     <div class="note">Pulsa en Guardar y terminar lección para guardar tu elección</div>
     <div id="level-radio-list" style="margin-bottom:.7rem"></div>
     <button id="level-save-btn">Guardar y terminar lección</button>
+    <button id="clear-history-btn" style="margin-top:.5rem;background:#ff6b6b;color:white;border:none;padding:.5rem 1rem;border-radius:var(--rad);cursor:pointer;font-size:.9rem;">Limpiar historial</button>
   </div>
 </section>
 
@@ -326,6 +327,7 @@ const DICT_KEY='curso_sueco_diccionario';
 const SESSIONS_KEY = 'curso_sueco_sesiones';   // guardará cada lección completa
 const LEVEL_KEY='curso_sueco_nivel';
 const THEME_KEY='curso_sueco_tema';
+const FRASES_USADAS_KEY='curso_sueco_frases_usadas'; // tracking de frases usadas en ejercicios
 const ENDPOINT='/.netlify/functions/openai';
 const TTS_ENDPOINT='/.netlify/functions/tts';
 
@@ -656,38 +658,54 @@ async function cargarFrasesNivel(nivelId) {
   }
 }
 
-// Función para obtener frases no usadas de un nivel
-function obtenerFrasesNoUsadas(nivelId, frases) {
-  const frasesUsadas = JSON.parse(localStorage.getItem(`frases_usadas_nivel_${nivelId}`) || '[]');
+
+
+// Función para obtener frases no usadas
+function obtenerFrasesNoUsadas(frases) {
+  const frasesUsadas = JSON.parse(localStorage.getItem(FRASES_USADAS_KEY) || '[]');
   const frasesDisponibles = frases.filter(frase => !frasesUsadas.includes(frase.id));
   
-  // Si no hay frases disponibles, resetear el nivel
+  // Si no hay frases disponibles, resetear el historial
   if (frasesDisponibles.length === 0) {
-    localStorage.removeItem(`frases_usadas_nivel_${nivelId}`);
+    console.log('No hay frases disponibles, reseteando historial de frases usadas');
+    localStorage.removeItem(FRASES_USADAS_KEY);
     return frases; // Devolver todas las frases
   }
   
   return frasesDisponibles;
 }
 
-// Función para marcar frase como usada
-function marcarFraseUsada(nivelId, fraseId) {
-  const frasesUsadas = JSON.parse(localStorage.getItem(`frases_usadas_nivel_${nivelId}`) || '[]');
-  if (!frasesUsadas.includes(fraseId)) {
-    frasesUsadas.push(fraseId);
-    localStorage.setItem(`frases_usadas_nivel_${nivelId}`, JSON.stringify(frasesUsadas));
-  }
+// Función para marcar frases como usadas
+function marcarFrasesUsadas(frases) {
+  const frasesUsadas = JSON.parse(localStorage.getItem(FRASES_USADAS_KEY) || '[]');
+  const nuevasFrasesUsadas = [...frasesUsadas];
+  
+  frases.forEach(frase => {
+    if (!nuevasFrasesUsadas.includes(frase.id)) {
+      nuevasFrasesUsadas.push(frase.id);
+    }
+  });
+  
+  localStorage.setItem(FRASES_USADAS_KEY, JSON.stringify(nuevasFrasesUsadas));
 }
 
-// Función para seleccionar frases aleatorias
+// Función para seleccionar frases aleatorias (sin repetición)
 function seleccionarFrasesAleatorias(frases, cantidad) {
+  // Primero filtrar frases no usadas
+  const frasesDisponibles = obtenerFrasesNoUsadas(frases);
+  
   const frasesAleatorias = [];
-  const frasesTemp = [...frases];
+  const frasesTemp = [...frasesDisponibles];
   
   for (let i = 0; i < cantidad && frasesTemp.length > 0; i++) {
     const indiceAleatorio = Math.floor(Math.random() * frasesTemp.length);
     frasesAleatorias.push(frasesTemp[indiceAleatorio]);
     frasesTemp.splice(indiceAleatorio, 1);
+  }
+  
+  // Marcar las frases seleccionadas como usadas
+  if (frasesAleatorias.length > 0) {
+    marcarFrasesUsadas(frasesAleatorias);
   }
   
   return frasesAleatorias;
@@ -790,31 +808,21 @@ async function fetchLesson(words, isDebugMode = false, debugInfo = ''){
     
   } catch (error) {
     console.error('Error cargando frases de ejercicios:', error);
-    // Fallback al sistema anterior
+    // Fallback al sistema anterior usando el nuevo sistema de tracking
     if (modoEnfocado || nivel === 1) {
       const frasesNivelActual = await cargarFrasesNivel(nivel);
-      const frasesDisponibles = obtenerFrasesNoUsadas(nivel, frasesNivelActual);
-      ejercicios = seleccionarFrasesAleatorias(frasesDisponibles, 10);
-      ejercicios.forEach(frase => marcarFraseUsada(nivel, frase.id));
+      ejercicios = seleccionarFrasesAleatorias(frasesNivelActual, 10);
     } else {
       const frasesNivelActual = await cargarFrasesNivel(nivel);
-      const frasesDisponiblesActual = obtenerFrasesNoUsadas(nivel, frasesNivelActual);
-      const frasesNivelActualSeleccionadas = seleccionarFrasesAleatorias(frasesDisponiblesActual, 5);
-      frasesNivelActualSeleccionadas.forEach(frase => marcarFraseUsada(nivel, frase.id));
+      const frasesNivelActualSeleccionadas = seleccionarFrasesAleatorias(frasesNivelActual, 5);
       
       const frasesNivelesInferiores = [];
       for (let nivelInferior = 1; nivelInferior < nivel; nivelInferior++) {
         const frasesNivel = await cargarFrasesNivel(nivelInferior);
-        const frasesDisponibles = obtenerFrasesNoUsadas(nivelInferior, frasesNivel);
-        frasesNivelesInferiores.push(...frasesDisponibles);
+        frasesNivelesInferiores.push(...frasesNivel);
       }
       
       const frasesNivelesInferioresSeleccionadas = seleccionarFrasesAleatorias(frasesNivelesInferiores, 5);
-      frasesNivelesInferioresSeleccionadas.forEach(frase => {
-        const nivelFrase = parseInt(frase.id.split('_')[0].substring(1));
-        marcarFraseUsada(nivelFrase, frase.id);
-      });
-      
       ejercicios = [...frasesNivelActualSeleccionadas, ...frasesNivelesInferioresSeleccionadas];
     }
   }
@@ -1075,6 +1083,34 @@ window.addEventListener('load',()=>{
         levelSelectWrap.style.display = '';
       }
     };
+    
+    // Botón limpiar historial
+    const clearHistoryBtn = document.getElementById('clear-history-btn');
+    if (clearHistoryBtn) {
+      clearHistoryBtn.onclick = function() {
+        if (confirm('¿Estás seguro de que quieres limpiar el historial? Esto eliminará:\n\n• Todas las frases marcadas como usadas en ejercicios\n• Todo el vocabulario guardado\n• Historial de sesiones\n\nEsta acción no se puede deshacer.')) {
+          // Limpiar frases usadas
+          localStorage.removeItem(FRASES_USADAS_KEY);
+          
+          // Limpiar vocabulario
+          localStorage.removeItem(DICT_KEY);
+          dictionary = [];
+          
+          // Limpiar sesiones
+          localStorage.removeItem(SESSIONS_KEY);
+          allSessions = [];
+          
+          // Mostrar mensaje de confirmación
+          alert('✅ Historial limpiado correctamente.\n\nSe han eliminado:\n• Frases usadas en ejercicios\n• Vocabulario guardado\n• Historial de sesiones\n\nPuedes empezar de nuevo con una lección fresca.');
+          
+          // Cerrar el selector de nivel
+          levelSelectWrap.classList.add('hidden');
+          
+          // Recargar la página para aplicar los cambios
+          setTimeout(() => location.reload(), 1000);
+        }
+      };
+    }
     // Log para selección de radio
     levelRadioList.addEventListener('change', function(e) {
       if(e.target && e.target.matches('input[type="radio"]')) {
